@@ -1,0 +1,47 @@
+rules_version = '2';
+
+// Deploy these from Firebase Console → Firestore Database → Rules,
+// or via `firebase deploy --only firestore:rules` if you use the Firebase CLI.
+//
+// Model: this site has exactly one admin account, created manually in
+// Firebase Console → Authentication (no public sign-up form exists anywhere
+// on the site), so "any signed-in user" is equivalent to "the admin".
+// If you ever add more Firebase Auth users for other purposes, tighten the
+// `isAdmin()` check below to match a specific email or a role field instead.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // Public content: anyone can read, only the signed-in admin can write.
+    match /products/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /stats/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /team/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /content/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Investor inquiries: anyone can submit one, only the admin can read/
+    // manage them. No public updates or deletes.
+    match /inquiries/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}
